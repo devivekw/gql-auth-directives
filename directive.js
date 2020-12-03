@@ -1,4 +1,7 @@
-const { SchemaDirectiveVisitor } = require('apollo-server');
+const {
+	SchemaDirectiveVisitor,
+	AuthenticationError,
+} = require('apollo-server');
 const { defaultFieldResolver } = require('graphql');
 
 class UpperDirective extends SchemaDirectiveVisitor {
@@ -27,10 +30,26 @@ class AuthenticatedDirective extends SchemaDirectiveVisitor {
 	visitFieldDefinition(field) {
 		const { resolve = defaultFieldResolver } = field;
 
-		field.resolve = async () => {};
+		field.resolve = async (root, otherArgs, ctx, info) => {
+			if (!ctx.user) {
+				throw new AuthenticationError(
+					'User not authenticated'
+				);
+			}
+
+			const result = await resolve.call(
+				this,
+				root,
+				otherArgs,
+				ctx,
+				info
+			);
+			return result;
+		};
 	}
 }
 
 module.exports = {
 	UpperDirective,
+	AuthenticatedDirective,
 };

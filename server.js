@@ -7,7 +7,10 @@ const { getUserFromJWTToken } = require('./auth');
 // Schema Data
 const typeDefs = require('./typeDefs');
 const resolvers = require('./resolver');
-const { UpperDirective } = require('./directive');
+const {
+	UpperDirective,
+	AuthenticatedDirective,
+} = require('./directive');
 
 const PORT = 3088;
 
@@ -16,6 +19,7 @@ const schema = makeExecutableSchema({
 	resolvers,
 	schemaDirectives: {
 		upper: UpperDirective,
+		authenticated: AuthenticatedDirective,
 	},
 });
 
@@ -23,7 +27,12 @@ const server = new ApolloServer({
 	schema,
 	context({ req }) {
 		const token = req.headers.authorization;
-		const user = getUserFromJWTToken(token);
+
+		let user;
+		if (token) {
+			user = getUserFromJWTToken(token);
+		}
+
 		return { user };
 	},
 });

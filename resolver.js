@@ -36,7 +36,7 @@ module.exports = {
 	Mutation: {
 		login: (_parent, args, _context, _info) => {
 			const { username, password } = args;
-			console.log('ctx', _context);
+
 			const checkForUser = users.some(
 				u =>
 					u.username === username && u.password === password
